@@ -23,7 +23,7 @@
 class Column: public Base
 {
 public:
-    Buffer buffer;
+    std::shared_ptr<Buffer> buffer;
     uint32_t entries = 0;
     std::shared_ptr<Node> node;
     std::shared_ptr<PrimitiveValue> primitive;
@@ -59,8 +59,8 @@ public:
         Column(node)
     {
         std::shared_ptr<Node> it = node->typeGet();
-
         primitive = Column::MakePrimitive(it);
+        buffer = std::make_shared<TypedBuffer<T>>();
     }
 
     std::string toString() override
@@ -73,7 +73,6 @@ public:
         return type_traits<T::type_num>::name;
     }
     std::shared_ptr<PrimitiveValue> getThisPrimitive() override {
-        //return std::make_shared<TypedPrimitiveValue<T>>();
         return std::allocate_shared<TypedPrimitiveValue<T>, free_list_allocator<uint8_t>>(free_list_alloca, TypedPrimitiveValue<T>());
     }
     inline uint32_t Append(const uint8_t* data) override
@@ -81,7 +80,7 @@ public:
         uint32_t bytes = type_traits<T::type_num>::value_byte_size;
 
         Primitive values = primitive->read((uint8_t*) data, bytes);
-        buffer.AppendPrimitive(values);
+        buffer->AppendPrimitive(values);
 
         entries++;
 
@@ -97,8 +96,8 @@ public:
         Column(node)
     {
         std::shared_ptr<Node> it = node->typeGet();
-
         primitive = Column::MakePrimitive(it);
+        buffer = std::make_shared<TypedBuffer<ByteArrayType>>();
     }
 
     std::string toString() override
@@ -111,20 +110,17 @@ public:
         return type_traits<ByteArrayType::type_num>::name;
     }
     std::shared_ptr<PrimitiveValue> getThisPrimitive() override {
-        //return std::make_shared<TypedPrimitiveValue<ByteArrayType>>();
         return std::allocate_shared<TypedPrimitiveValue<ByteArrayType>, free_list_allocator<uint8_t>>(free_list_alloca, TypedPrimitiveValue<ByteArrayType>());
     }
     inline uint32_t Append(const uint8_t* data) override
     {
-        uint32_t bytes = *(uint32_t*) data;
-        bytes = ntohl(bytes);
-
-        Primitive values = primitive->read((uint8_t*) data, bytes);
-        buffer.AppendPrimitive(values);
+        uint32_t bytes = *(uint32_t*) &data[0];        
+        Primitive values = primitive->read((uint8_t*) data, bytes + sizeof(bytes));
+        buffer->AppendPrimitive(values);
 
         entries++;
 
-        return (bytes + sizeof(uint32_t));
+        return (bytes + sizeof(bytes));
     }
 };
 

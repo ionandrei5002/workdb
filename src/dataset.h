@@ -293,33 +293,16 @@ public:
         {
             db::vector<std::shared_ptr<PrimitiveValue>> cells;
 
-            if (m_fields.size() == 0)
+            auto it = columns->begin();
+            auto end = columns->end();
+            for (; it != end; ++it)
             {
-                auto it = columns->begin();
-                auto end = columns->end();
-                for (; it != end; ++it)
-                {
-                    uint32_t column = (*it).first;
+                uint32_t column = (*it).first;
 
-                    std::shared_ptr<PrimitiveValue> cell = table.getColumns()->at(column)->getThisPrimitive();
-                    table.getColumns()->at(column)->buffer.getPrimitive(cell, i);
+                std::shared_ptr<PrimitiveValue> cell = table.getColumns()->at(column)->getThisPrimitive();
+                table.getColumns()->at(column)->buffer->getPrimitive(cell, i);
 
-                    cells.push_back(std::move(cell));
-                }
-            }
-            else
-            {
-                auto it = m_fields.begin();
-                auto end = m_fields.end();
-                for (; it != end; ++it)
-                {
-                    uint32_t column = (*it);
-
-                    std::shared_ptr<PrimitiveValue> cell = table.getColumns()->at(column)->getThisPrimitive();
-                    table.getColumns()->at(column)->buffer.getPrimitive(cell, i);
-
-                    cells.push_back(std::move(cell));
-                }
+                cells.emplace_back(cell);
             }
 
             std::shared_ptr<Row> row = std::allocate_shared<Row,
@@ -332,3 +315,4 @@ public:
 ;
 
 #endif /* SRC_DATASET_H_ */
+

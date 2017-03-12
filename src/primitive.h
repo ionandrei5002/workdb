@@ -164,7 +164,7 @@ public:
 
     Primitive read(uint8_t* data, uint32_t bytes) const override
     {
-        PrimitiveValue::reverse((void*) data, bytes);
+        //PrimitiveValue::reverse((void*) data, bytes);
         Primitive values(data, bytes);
 
         return values;
@@ -194,7 +194,9 @@ public:
 
     Primitive read(uint8_t* data, uint32_t bytes) const override
     {
-        //return nullptr;
+        Primitive values(data, bytes);
+
+        return values;
     }
 };
 

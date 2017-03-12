@@ -68,7 +68,6 @@ struct ByteArray: public Base
 	friend std::ostream &operator<<(std::ostream &output,
 			const ByteArray &input)
 	{
-		output.write((char*) &input.len, sizeof(uint32_t));
 		output.write((char*) input.ptr, input.len);
 		return output;
 	}

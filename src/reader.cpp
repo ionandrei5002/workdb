@@ -38,3 +38,33 @@ std::shared_ptr<PrimitiveReader> PrimitiveReader::Make(
 		return nullptr;
 	}
 }
+
+std::shared_ptr<StringReader> StringReader::Make(
+    std::shared_ptr<Column> column) {
+    switch (column->node->getType()) {
+    case Type::UINT8:
+        return std::make_shared<TypedStringReader<UInt8Type>>(column);
+    case Type::INT8:
+        return std::make_shared<TypedStringReader<Int8Type>>(column);
+    case Type::UINT16:
+        return std::make_shared<TypedStringReader<UInt16Type>>(column);
+    case Type::INT16:
+        return std::make_shared<TypedStringReader<Int16Type>>(column);
+    case Type::UINT32:
+        return std::make_shared<TypedStringReader<UInt32Type>>(column);
+    case Type::INT32:
+        return std::make_shared<TypedStringReader<Int32Type>>(column);
+    case Type::UINT64:
+        return std::make_shared<TypedStringReader<UInt64Type>>(column);
+    case Type::INT64:
+        return std::make_shared<TypedStringReader<Int64Type>>(column);
+    case Type::FLOAT:
+        return std::make_shared<TypedStringReader<FloatType>>(column);
+    case Type::DOUBLE:
+        return std::make_shared<TypedStringReader<DoubleType>>(column);
+    case Type::BYTE_ARRAY:
+        return std::make_shared<TypedStringReader<ByteArrayType>>(column);
+    default:
+        return nullptr;
+    }
+}

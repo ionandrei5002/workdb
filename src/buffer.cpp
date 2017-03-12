@@ -47,8 +47,11 @@ void Buffer::resize()
     this->capacity = new_capacity;
     free(this->buffer);
     this->buffer = new_buffer;
+    new_buffer = nullptr;
     this->bytesLeft = this->capacity - this->size;
 }
+
+/*
 void Buffer::AppendPrimitive(const Primitive& data)
 {
     uint32_t bytes = data.bytes;
@@ -68,4 +71,4 @@ void Buffer::getPrimitive(std::shared_ptr<PrimitiveValue> cell, uint32_t positio
     uint8_t* values = &this->buffer[bytes * position];
     cell->Init(new Primitive(values, bytes));
 }
-
+*/
