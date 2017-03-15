@@ -46,9 +46,9 @@ public:
 	pointer allocate(size_type n, const void * = 0)
 	{
 //		void* t = operator new(n * sizeof(T));
-//		void* t = malloc(n * sizeof(T));
+		void* t = malloc(n * sizeof(T));
 
-		void* t = freelist_pool.allocate(n * sizeof(T));
+		//void* t = freelist_pool.allocate(n * sizeof(T));
 		return (pointer) t;
 	}
 
@@ -57,9 +57,9 @@ public:
 		if (p)
 		{
 //			operator delete(p);
-//			free(p);
+			free(p);
 
-			freelist_pool.deallocate((char*) p);
+			//freelist_pool.deallocate((char*) p);
 		}
 	}
 

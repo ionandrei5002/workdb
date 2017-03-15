@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <netinet/in.h>
 #include "allocator/free_list_allocator.h"
+#include "rawbuffer.h"
 
 class PrimitiveReader: public Base
 {
@@ -73,10 +74,11 @@ public:
 class RowReader: public Base
 {
 private:
+    Table& table;
     std::vector<std::shared_ptr<PrimitiveReader>> reader;
 public:
 
-    RowReader(Table& table)
+    RowReader(Table& table) : table(table)
     {
         uint32_t num_columns = table.num_columns();
         uint32_t i = 0;
@@ -85,7 +87,9 @@ public:
             reader.push_back(PrimitiveReader::Make(table.getColumn(i)));
         }
     }
-
+    std::vector<std::shared_ptr<PrimitiveReader>> getReaders() {
+        return this->reader;
+    }
     void read(std::ifstream& in)
     {
         in.seekg(0, std::ios::end);
@@ -123,7 +127,7 @@ public:
     virtual ~StringReader() {
     }
     static std::shared_ptr<StringReader> Make(std::shared_ptr<Column> column);
-    virtual void read(std::string* in) = 0;
+    virtual void read(RawBuffer& row, std::string* in) = 0;
 };
 
 template<typename T>
@@ -133,48 +137,46 @@ public:
         StringReader(column) {
     }
 
-    void read(std::string* in) override {
+    void read(RawBuffer& row, std::string* in) override {
         uint32_t size = type_traits<T::type_num>::value_byte_size;
-        char buffer[size];
 
         switch (T::type_num) {
         case Type::UINT8:
         case Type::INT8: {
             int8_t p = (int8_t) std::stoi(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
         break;
         case Type::UINT16:
         case Type::INT16: {
             short p = (short) std::stoi(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
         break;
         case Type::UINT32:
         case Type::INT32: {
             int p = (int) std::stoi(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
         break;
         case Type::UINT64:
         case Type::INT64: {
             long p = (long) std::stol(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
         break;
         case Type::FLOAT: {
             float p = (float) std::stof(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
+
         break;
         case Type::DOUBLE: {
             double p = (double) std::stod(*in);
-            memcpy((void*) &buffer[0], reinterpret_cast<void*>(&p), size);
+            row.Append(reinterpret_cast<uint8_t*>(&p), size);
         }
         break;
         }
-
-        column->Append((uint8_t*) &buffer[0]);
     }
 };
 
@@ -185,13 +187,11 @@ public:
         StringReader(column) {
     }
 
-    void read(std::string* in) override {
+    void read(RawBuffer& row, std::string* in) override {
         uint32_t size = in->size();
-        char buffer[size + sizeof(size)];
-        memcpy((void*) &buffer[0], (void*) &size, sizeof(size));
-        memcpy((void*) &buffer[sizeof(size)], (void*) in->data(), size);
 
-        column->Append((uint8_t*) &buffer[0]);
+        row.Append(reinterpret_cast<uint8_t*>(&size), sizeof(uint32_t));
+        row.Append((uint8_t*) in->data(), size);
     }
 };
 
@@ -207,9 +207,24 @@ public:
             reader.push_back(StringReader::Make(table.getColumn(i)));
         }
     }
+    std::vector<std::shared_ptr<StringReader>> getReaders() {
+        return this->reader;
+    }
     void read(std::ifstream& in) {
+        RowReader rowReader(this->table);
+
+        RawBuffer buff(16 * 1024 * 1024);
+        RawBuffer row(1024 * 1024);
+
+        std::vector<std::shared_ptr<PrimitiveReader>> rowReaders = rowReader.getReaders();
+
+        std::string line;
+        line.reserve(65555);
+
+        std::string token;
+        token.reserve(6555);
+
         while (true) {
-            std::string line;
             std::getline(in, line);
 
             if (in.eof()) {
@@ -217,14 +232,51 @@ public:
             }
 
             std::stringstream lineStream(line);
-            std::string token;
 
             for (auto it = reader.begin(); it != reader.end(); ++it) {
                 std::shared_ptr<StringReader> read = (*it);
-                std::getline(lineStream, token, ';');
-                read->read(&token);
+                std::getline(lineStream, token, ',');
+
+                token.erase(token.find_last_not_of("\"") + 1);
+                token.erase(0,1);
+
+                read->read(row, &token);
+            }
+
+            bool full = buff.Append(row.getBuffer(), row.getSize());
+
+            if (full == true) {
+                uint32_t bytes_read = 0;
+                while (bytes_read < buff.getSize())
+                {
+                    auto it = rowReaders.begin();
+                    auto end = rowReaders.end();
+                    for (; it != end; ++it)
+                    {
+                        std::shared_ptr<PrimitiveReader> read = (*it);
+                        bytes_read += read->read(&buff.getBuffer()[bytes_read]);
+                    }
+                }
+                buff.resetSize();
+                buff.Append(row.getBuffer(), row.getSize());
+            }
+
+            row.resetSize();
+        }
+
+        uint32_t bytes_read = 0;
+        while (bytes_read < buff.getSize())
+        {
+            auto it = rowReaders.begin();
+            auto end = rowReaders.end();
+            for (; it != end; ++it)
+            {
+                std::shared_ptr<PrimitiveReader> read = (*it);
+                bytes_read += read->read(&buff.getBuffer()[bytes_read]);
             }
         }
+        row.resetSize();
+        buff.resetSize();
     }
 };
 

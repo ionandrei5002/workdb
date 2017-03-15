@@ -289,7 +289,7 @@ public:
         }
 
         uint32_t i = 0;
-        for (; i < nb_rows; ++i)
+        for (; i < 100; ++i)
         {
             db::vector<std::shared_ptr<PrimitiveValue>> cells;
 

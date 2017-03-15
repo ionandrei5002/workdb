@@ -22,5 +22,8 @@ Use External Terminal=false
 Working Directory=
 isExecutable=true
 
+[Project]
+VersionControlSupport=kdevgit
+
 [SourceFileTemplates]
 LastUsedTemplate=/home/andrei/.local/share/kdevfiletemplates/template_descriptions/cpp_basic.desktop

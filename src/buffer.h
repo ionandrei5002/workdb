@@ -83,7 +83,7 @@ public:
             this->resize();
         }
 
-        uint8_t* cursor =  this->buffer + this->size;        
+        uint8_t* cursor =  this->buffer + this->size;
         memcpy(cursor, values, bytes);
         this->size += bytes;
         this->bytesLeft = this->capacity - this->size;
@@ -92,10 +92,10 @@ public:
     {
         uint32_t offset = 0;
 
-        /*for(uint32_t i = 0; i < position; i++) {
+        for(uint32_t i = 0; i < position; i++) {
             uint32_t size = *(uint32_t*)&buffer[offset];
             offset += (size + sizeof(size));
-        }*/
+        }
 
         uint32_t type_size = *(uint32_t*)&buffer[offset];
         offset += sizeof(type_size);

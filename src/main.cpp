@@ -15,7 +15,7 @@
 #include "reader.h"
 #include "dataset.h"
 
-FreeListPool freelist_pool = FreeListPool(800 * 1024 * 1024);
+FreeListPool freelist_pool = FreeListPool(0 * 1024 * 1024);
 
 int main(int argc, char **argv)
 {
@@ -33,17 +33,19 @@ int main(int argc, char **argv)
     nodes.push_back(std::make_shared<TypedNode<Int32Type>>("time_spent"));
     nodes.push_back(std::make_shared<TypedNode<Int32Type>>("level"));
     */
-    nodes.push_back(std::make_shared<TypedNode<UInt8Type>>("_c0"));
-    nodes.push_back(std::make_shared<TypedNode<Int8Type>>("_c1"));
-    nodes.push_back(std::make_shared<TypedNode<UInt16Type>>("_c2"));
-    nodes.push_back(std::make_shared<TypedNode<Int16Type>>("_c3"));
-    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("_c4"));
-    nodes.push_back(std::make_shared<TypedNode<Int32Type>>("_c5"));
-    nodes.push_back(std::make_shared<TypedNode<UInt64Type>>("_c6"));
-    nodes.push_back(std::make_shared<TypedNode<Int64Type>>("_c7"));
-    nodes.push_back(std::make_shared<TypedNode<FloatType>>("_c8"));
-    nodes.push_back(std::make_shared<TypedNode<DoubleType>>("_c9"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("_c10"));
+
+    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("ggi"));
+    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("version_id"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("version"));
+    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("event_type_id"));
+    nodes.push_back(std::make_shared<TypedNode<UInt16Type>>("is_batchable"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_name"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_key"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_type"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_datatype"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("yoy_datatype"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("release"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("enabled"));
 
     Schema schema(nodes);
 //	schema.Debug();
@@ -60,7 +62,7 @@ int main(int argc, char **argv)
     */
 
     std::ifstream is;
-    is.open("/home/andrei/Desktop/data.csv", std::ios_base::in);
+    is.open("/home/andrei/Desktop/oldies/yoy__tracking_metadata_memory.csv", std::ifstream::binary);
 
     CsvReader reader(table);
     reader.read(is);
@@ -75,28 +77,27 @@ int main(int argc, char **argv)
     db::vector<std::shared_ptr<Row>> rows;
     Dataset set = Dataset::Init(table);
 
-    db::vector<uint32_t> columns
-    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    db::vector<uint32_t> columns {};
 
     set.Fields(columns).Filter(
-    		Predicate::Make(table, 3, (uint8_t*) &launches,
-    				Condition::EQUAL_MORE, false)).Filter(
-    		Predicate::Make(table, 2, (uint8_t*) &country, Condition::EQUAL,
-    				false)).Filter(
-    		Predicate::Make(table, 6, (uint8_t*) &level, Condition::EQUAL,
-    				false)).getRows(rows);
+        Predicate::Make(table, 3, (uint8_t*) &launches,
+                        Condition::EQUAL_MORE, false)).Filter(
+                            Predicate::Make(table, 2, (uint8_t*) &country, Condition::EQUAL,
+                                            false)).Filter(
+                                                    Predicate::Make(table, 6, (uint8_t*) &level, Condition::EQUAL,
+                                                            false)).getRows(rows);
 
     std::cout << " ======================== " << std::endl;
     std::cout << "rows = " << rows.size() << std::endl;
-
+    
     auto it = rows.begin();
     auto endIt = rows.end();
     for (; it != endIt; ++it)
     {
-    	std::shared_ptr<Row> row = (*it);
-    	row->toString();
+        std::shared_ptr<Row> row = (*it);
+        row->toString();
 
-    	std::cout << std::endl;
+        std::cout << std::endl;
     }
     */
     end = std::chrono::high_resolution_clock::now();
@@ -106,3 +107,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
