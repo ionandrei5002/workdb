@@ -223,6 +223,8 @@ public:
 
         std::string token;
         token.reserve(6555);
+        
+        std::stringstream lineStream;
 
         while (true) {
             std::getline(in, line);
@@ -230,8 +232,9 @@ public:
             if (in.eof()) {
                 break;
             }
-
-            std::stringstream lineStream(line);
+            
+            lineStream.seekg(0);
+            lineStream.str(line);
 
             for (auto it = reader.begin(); it != reader.end(); ++it) {
                 std::shared_ptr<StringReader> read = (*it);
@@ -239,13 +242,11 @@ public:
 
                 token.erase(token.find_last_not_of("\"") + 1);
                 token.erase(0,1);
-
+                
                 read->read(row, &token);
             }
 
-            bool full = buff.Append(row.getBuffer(), row.getSize());
-
-            if (full == true) {
+            if (true == buff.Append(row.getBuffer(), row.getSize())) {
                 uint32_t bytes_read = 0;
                 while (bytes_read < buff.getSize())
                 {
