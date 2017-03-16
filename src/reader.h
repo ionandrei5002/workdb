@@ -219,10 +219,8 @@ public:
         std::vector<std::shared_ptr<PrimitiveReader>> rowReaders = rowReader.getReaders();
 
         std::string line;
-        line.reserve(65555);
 
         std::string token;
-        token.reserve(6555);
         
         std::stringstream lineStream;
 
@@ -240,15 +238,16 @@ public:
                 std::shared_ptr<StringReader> read = (*it);
                 std::getline(lineStream, token, ',');
 
-                token.erase(token.find_last_not_of("\"") + 1);
-                token.erase(0,1);
+                //token.erase(token.find_last_not_of("\"") + 1);
+                //token.erase(0,1);
                 
                 read->read(row, &token);
             }
 
             if (true == buff.Append(row.getBuffer(), row.getSize())) {
                 uint32_t bytes_read = 0;
-                while (bytes_read < buff.getSize())
+                uint32_t buff_size = buff.getSize();
+                while (bytes_read < buff_size)
                 {
                     auto it = rowReaders.begin();
                     auto end = rowReaders.end();
@@ -266,7 +265,8 @@ public:
         }
 
         uint32_t bytes_read = 0;
-        while (bytes_read < buff.getSize())
+        uint32_t buff_size = buff.getSize();
+        while (bytes_read < buff_size)
         {
             auto it = rowReaders.begin();
             auto end = rowReaders.end();

@@ -20,6 +20,7 @@
 RawBuffer::RawBuffer(uint32_t bufSize)
 {
     this->capacity = bufSize;
+    this->bytesLeft = this->capacity;
     this->size = 0;
     this->buffer = free_list_alloca.allocate(bufSize);
 }
@@ -29,6 +30,7 @@ RawBuffer::~RawBuffer()
     this->buffer = nullptr;
     this->size = 0;
     this->capacity = 0;
+    this->bytesLeft = 0;
 }
 uint32_t RawBuffer::getCapacity()
 {
@@ -50,7 +52,7 @@ bool RawBuffer::Append(uint8_t* data, uint32_t len)
 {
     bool full = false;
 
-    if (len > (capacity - size)) {
+    if (len > this->capacity - this->size) {
         full = true;
     } else {
         uint8_t* cursor = this->buffer + this->size;
