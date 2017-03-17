@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include "allocator/free_list_allocator.h"
 #include "rawbuffer.h"
+#include "writeraheadlogger.h"
 
 class PrimitiveReader: public Base
 {
@@ -213,7 +214,7 @@ public:
     void read(std::ifstream& in) {
         RowReader rowReader(this->table);
 
-        RawBuffer buff(16 * 1024 * 1024);
+        RawBuffer buff(64 * 1024 * 1024);
         RawBuffer row(1024 * 1024);
 
         std::vector<std::shared_ptr<PrimitiveReader>> rowReaders = rowReader.getReaders();
@@ -221,7 +222,7 @@ public:
         std::string line;
 
         std::string token;
-        
+
         std::stringstream lineStream;
 
         while (true) {
@@ -230,7 +231,7 @@ public:
             if (in.eof()) {
                 break;
             }
-            
+
             lineStream.seekg(0);
             lineStream.str(line);
 
@@ -238,13 +239,19 @@ public:
                 std::shared_ptr<StringReader> read = (*it);
                 std::getline(lineStream, token, ',');
 
-                //token.erase(token.find_last_not_of("\"") + 1);
-                //token.erase(0,1);
-                
+                token.erase(token.find_last_not_of("\"") + 1);
+                token.erase(0,1);
+
                 read->read(row, &token);
             }
 
             if (true == buff.Append(row.getBuffer(), row.getSize())) {
+                WriterAheadLogger wal(buff, "/home/andrei/Desktop");
+                wal.write(table.walCounter);
+                buff.resetSize();
+                
+                wal.read(table.walCounter);
+                
                 uint32_t bytes_read = 0;
                 uint32_t buff_size = buff.getSize();
                 while (bytes_read < buff_size)
@@ -257,6 +264,8 @@ public:
                         bytes_read += read->read(&buff.getBuffer()[bytes_read]);
                     }
                 }
+                table.walCounter++;
+
                 buff.resetSize();
                 buff.Append(row.getBuffer(), row.getSize());
             }
@@ -264,6 +273,12 @@ public:
             row.resetSize();
         }
 
+        WriterAheadLogger wal(buff, "/home/andrei/Desktop");
+        wal.write(table.walCounter);
+        buff.resetSize();
+        
+        wal.read(table.walCounter);
+        
         uint32_t bytes_read = 0;
         uint32_t buff_size = buff.getSize();
         while (bytes_read < buff_size)
@@ -276,8 +291,11 @@ public:
                 bytes_read += read->read(&buff.getBuffer()[bytes_read]);
             }
         }
-        row.resetSize();
+        
+        table.walCounter++;
+
         buff.resetSize();
+        row.resetSize();
     }
 };
 

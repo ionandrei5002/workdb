@@ -29,7 +29,7 @@ private:
 	Schema& schema;
 	db::map<uint32_t, std::shared_ptr<Column>> columns;
 	db::map<uint32_t, std::shared_ptr<Printer>> printers;
-	db::map<uint32_t, std::shared_ptr<PrimitiveValue>> primitives;
+	db::map<uint32_t, std::shared_ptr<PrimitiveValue>> primitives;    
 	void Init()
 	{
 		db::vector<std::shared_ptr<Node>> nodes = schema.getNodes();
@@ -51,6 +51,7 @@ private:
 	}
 
 public:
+    uint32_t walCounter = 0;
 	Table(Schema& schema) :
 			schema(schema)
 	{
