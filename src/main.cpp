@@ -15,9 +15,9 @@
 #include "reader.h"
 #include "dataset.h"
 
-FreeListPool freelist_pool = FreeListPool(0 * 1024 * 1024);
+FreeListPool freelist_pool = FreeListPool(1024 * 1024 * 1024);
 
-int main(int argc, char **argv)
+int main()
 {
     std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 

@@ -51,7 +51,7 @@ template<typename T>
 class TypedNode: public Node
 {
 public:
-	TypedNode(std::string name) :
+	explicit TypedNode(std::string name) :
 			Node(T::type_num, name)
 	{
 		this->node = std::make_shared<TypedNode<T>>(*this);

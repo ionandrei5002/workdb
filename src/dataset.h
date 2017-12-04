@@ -273,10 +273,10 @@ public:
 
         db::map<uint32_t, std::shared_ptr<Column>>* columns =
                 table.getColumns();
-        db::map<uint32_t, std::shared_ptr<PrimitiveValue>>* primitives =
-                    table.getPrimitives();
-
-        uint32_t nb_rows = table.num_rows();
+//         db::map<uint32_t, std::shared_ptr<PrimitiveValue>>* primitives =
+//                     table.getPrimitives();
+// 
+//         uint32_t nb_rows = table.num_rows();
 
         auto it_print = table.getPrinters()->begin();
         auto end_print = table.getPrinters()->end();
