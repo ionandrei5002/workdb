@@ -24,6 +24,21 @@ int main()
     start = std::chrono::high_resolution_clock::now();
 
     db::vector<std::shared_ptr<Node>> nodes;
+
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c1"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c2"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c3"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c4"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c5"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c6"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c7"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c8"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c9"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c10"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c11"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c12"));
+    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("c13"));
+
     /*
     nodes.push_back(std::make_shared<TypedNode<Int64Type>>("udid_id"));
     nodes.push_back(std::make_shared<TypedNode<Int32Type>>("ver_id"));
@@ -34,18 +49,18 @@ int main()
     nodes.push_back(std::make_shared<TypedNode<Int32Type>>("level"));
     */
     
-    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("ggi"));
-    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("version_id"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("version"));
-    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("event_type_id"));
-    nodes.push_back(std::make_shared<TypedNode<UInt16Type>>("is_batchable"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_name"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_key"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_type"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_datatype"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("yoy_datatype"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("release"));
-    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("enabled"));
+//    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("ggi"));
+//    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("version_id"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("version"));
+//    nodes.push_back(std::make_shared<TypedNode<UInt32Type>>("event_type_id"));
+//    nodes.push_back(std::make_shared<TypedNode<UInt16Type>>("is_batchable"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_name"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_key"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_type"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("param_datatype"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("yoy_datatype"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("release"));
+//    nodes.push_back(std::make_shared<TypedNode<ByteArrayType>>("enabled"));
     
     /*
     nodes.push_back(std::make_shared<TypedNode<UInt8Type>>("_c0"));
@@ -75,8 +90,8 @@ int main()
     */
     
     std::ifstream is;
-    is.open("/home/andrei/Desktop/oldies/yoy__tracking_metadata_memory.csv", std::ifstream::binary);
-    //is.open("/home/andrei/Desktop/data.csv", std::ios_base::in);
+//    is.open("/home/andrei/Desktop/oldies/yoy__tracking_metadata_memory.csv", std::ifstream::binary);
+    is.open("/home/andrei/Desktop/oldies/desktop4/waa_android.csv", std::ios_base::in);
 
     CsvReader reader(table);
     reader.read(is);
